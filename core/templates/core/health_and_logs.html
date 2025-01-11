@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Device Health and Logs</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Device Health and Logs</h1>
+
+    <h2>Device Health Over Time</h2>
+    <canvas id="healthChart" width="400" height="200"></canvas>
+
+    <h2>Recent Action Logs</h2>
+    <table border="1" id="logsTable">
+        <thead>
+            <tr>
+                <th>Action</th>
+                <th>Status</th>
+                <th>Timestamp</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <script>
+        // Fetch device health data
+        fetch('/api/get_device_health/')
+            .then(response => response.json())
+            .then(data => {
+                const graphData = data.health;
+
+                // Prepare data for graphing
+                const labels = graphData.map(entry => entry.date);
+                const statuses = graphData.map(entry => entry.status === "active" ? 1 : 0); // 1 for active, 0 for offline
+
+                // Render the chart
+                const ctx = document.getElementById('healthChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Device Health (1 = Active, 0 = Offline)',
+                            data: statuses,
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => console.error('Error fetching graph data:', error));
+
+        // Fetch action logs
+        fetch('/api/get_action_logs/')
+            .then(response => response.json())
+            .then(data => {
+                const logs = data.logs;
+                const tableBody = document.getElementById('logsTable').querySelector('tbody');
+
+                logs.forEach(log => {
+                    const row = document.createElement('tr');
+
+                    const actionCell = document.createElement('td');
+                    actionCell.textContent = log.action_name;
+                    row.appendChild(actionCell);
+
+                    const statusCell = document.createElement('td');
+                    statusCell.textContent = log.status ? 'Success' : 'Failed';
+                    row.appendChild(statusCell);
+
+                    const timestampCell = document.createElement('td');
+                    timestampCell.textContent = new Date(log.timestamp).toLocaleString();
+                    row.appendChild(timestampCell);
+
+                    tableBody.appendChild(row);
+                });
+            })
+            .catch(error => console.error('Error fetching logs:', error));
+    </script>
+</body>
+</html>
