@@ -123,3 +123,9 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'  # Ensure this is a valid path
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://esp32iot-production.up.railway.app',  # Add your Railway domain
+]
+CSRF_COOKIE_SECURE = True  # Enforce secure cookies for CSRF
+SESSION_COOKIE_SECURE = True  # Enforce secure cookies for session
