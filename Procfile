@@ -1,1 +1,1 @@
-web: gunicorn esp32_control.wsgi
+web: gunicorn esp32_iot.wsgi
